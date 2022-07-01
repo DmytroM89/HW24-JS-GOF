@@ -21,16 +21,18 @@ class Rose {
     constructor(pubsub) {
         this.name = 'Rose';
         this.pubsub = pubsub;
-        this.pubsub.subscribe('event-message', this.emitMessage, this);
+        this.pubsub.subscribe('jack-to-rose', this.sendMessage, this);
+        this.pubsub.subscribe('billy-to-rose', this.sendMessage, this);
     }
 
-    emitMessage(msg, sender) {
+    sendMessage(msg, sender) {
         console.log(sender + ': ', msg);
-        const event = sender === 'Jack' ? 'rose-billy' : 'rose-jack';
-        this.sendMessage(event, `I'm happy with ${sender}`);
+        const event = sender === 'Jack' ? 'rose-to-billy' : 'rose-to-jack';
+        const recipient = sender === 'Jack' ? 'Billy' : 'Jack'
+        this.publishMessage(event, `${recipient} sorry I'm happy with ${sender}`);
     }
 
-    sendMessage(event, msg) {
+    publishMessage(event, msg) {
         this.pubsub.publish(event, msg, this.name);
     }
 }
@@ -39,15 +41,15 @@ class Billy {
     constructor(pubsub) {
         this.name = 'Billy';
         this.pubsub = pubsub;
-        this.pubsub.subscribe('rose-billy', this.emitMessage, this);
+        this.pubsub.subscribe('rose-to-billy', this.sendMessage, this);
     }
 
-    emitMessage(msg, sender) {
+    sendMessage(msg, sender) {
         console.log(sender + ': ' + msg);
         console.log(`${this.name} left the chat`);
     }
 
-    sendMessage(event, msg) {
+    publishMessage(event, msg) {
         this.pubsub.publish(event, msg, this.name);
     }
 }
@@ -56,10 +58,10 @@ class Jack {
     constructor(pubsub) {
         this.name = 'Jack';
         this.pubsub = pubsub;
-        this.pubsub.subscribe('rose-jack', this.emitMessage, this);
+        this.pubsub.subscribe('rose-to-jack', this.sendMessage, this);
     }
 
-    emitMessage(msg, sender) {
+    sendMessage(msg, sender) {
         console.log(sender + ': ' + msg);
         if (sender === 'Rose') {
             console.log(`${this.name} left the chat`);
@@ -67,7 +69,7 @@ class Jack {
 
     }
 
-    sendMessage(event, msg) {
+    publishMessage(event, msg) {
         this.pubsub.publish(event, msg, this.name);
     }
 }
@@ -77,4 +79,4 @@ const rose = new Rose(pubsub);
 const billy = new Billy(pubsub);
 const jack = new Jack(pubsub);
 
-jack.sendMessage('event-message', 'Rose how are you doing?');
+jack.publishMessage('billy-to-rose', 'Rose I love you!');
